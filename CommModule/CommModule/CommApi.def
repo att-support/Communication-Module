@@ -1,0 +1,17 @@
+LIBRARY CommModule
+EXPORTS
+	ManApiSetParameterInitComm
+	ManApiAppendListener
+	ManApiAppendListenerById
+	ManApiSetParameterInitBrowser
+	ManApiStartServer
+	ManApiStartClient
+	ManApiStop
+	InputApiPushData
+	InputApiPushDataById
+	OutputApiPullData
+	OutputApiPullDataById
+	CreateCommData
+	ReleaseCommData
+	ManApiSetLogDirPath
+

@@ -20,6 +20,5 @@ Please wait..
 This LICENSE is LGPL3.0 license.
 
 ## Author
-ATTRACTOR Co., Ltd. | 
-Spacial thanks to Traffic Sim Co.,Ltd. for helping to make the project public.
+ATTRACTOR Co., Ltd.
 

@@ -3,6 +3,8 @@ EXPORTS
 	ManApiSetParameterInitComm
 	ManApiAppendListener
 	ManApiAppendListenerById
+	ManApiRemoveListener
+	ManApiRemoveListenerById
 	ManApiSetParameterInitBrowser
 	ManApiStartServer
 	ManApiStartClient

@@ -147,6 +147,10 @@ int TcpClient::SetReceiver(TcpReceiveInterface* receiver, int rcvSize) {
 	return 0;
 }
 
+void TcpClient::RemoveReceiver() {
+	m_receiver = NULL;
+}
+
 int TcpClient::ThreadInitProc() {
 	_Connect();
 	if(m_logOn){

@@ -38,6 +38,7 @@ public:
 	int Send(const std::vector<unsigned char>& data);
 	int Send(const unsigned char* data, int size);
 	int SetReceiver(TcpReceiveInterface* receiver, int rcvSize);
+	void RemoveReceiver();
 	void KeepAliveOn(int idleTime, int interval, int retryCount);
 	void KeepAliveOff();
 

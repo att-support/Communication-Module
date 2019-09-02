@@ -64,6 +64,24 @@ int CommMain::AppendListener(ICommListenerById* pListener)
 }
 
 //
+// リスナー削除
+//
+void CommMain::RemoveListener()
+{
+	LOG("[CommMain(id=%d)] Remove listener.", _id);
+	_pListenerList.clear();
+}
+
+//
+// リスナー削除(ID指定)
+//
+void CommMain::RemoveListenerById()
+{
+	LOG("[CommMain(id=%d)] Remove listener. (id=%d)", _id, _id);
+	_pListenerListById.clear();
+}
+
+//
 // クライアント初期設定（プロセスパスと制御ポート）
 //
 int CommMain::SetParameterInitBrowser(const char* pBmlBrowserPath, int port)

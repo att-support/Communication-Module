@@ -21,6 +21,9 @@ ServerMain::ServerMain(int pattern)
 	ManApiAppendListenerById = (FUNC_ManApiAppendListenerById)GetProcAddress(_hDll, "ManApiAppendListenerById");
 	if (ManApiAppendListenerById == NULL) return;
 
+	ManApiRemoveListenerById = (FUNC_ManApiRemoveListenerById)GetProcAddress(_hDll, "ManApiRemoveListenerById");
+	if (ManApiRemoveListenerById == NULL) return;
+
 	ManApiSetParameterInitBrowser = (FUNC_ManApiSetParameterInitBrowser)GetProcAddress(_hDll, "ManApiSetParameterInitBrowser");
 	if (ManApiSetParameterInitBrowser == NULL) return;
 
@@ -270,6 +273,7 @@ int ServerMain::ThreadInitProc() {
 }
 // ÉXÉåÉbÉhå„èàóù
 int ServerMain::ThreadTermProc() {
+	ManApiRemoveListenerById(pattern);
 	ManApiStop(pattern);
 	return 0;
 }

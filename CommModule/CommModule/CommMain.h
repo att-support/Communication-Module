@@ -29,6 +29,10 @@ public:
 	int AppendListener(ICommListener* pListener);
 	// リスナー登録
 	int AppendListener(ICommListenerById* pListener);
+	// リスナー削除
+	void RemoveListener();
+	// リスナー削除(ID指定)
+	void RemoveListenerById();
 	// クライアント初期設定（プロセスパスと制御ポート）
 	int SetParameterInitBrowser(const char* pBmlBrowserPath, int port);
 	// サーバ通信開始

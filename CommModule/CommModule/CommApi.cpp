@@ -50,7 +50,7 @@ int ManApiAppendListener(ICommListener* pListener)
 	return CommCtrl::GetIns()->AppendListener(pListener);
 }
 
-//ManApiAppendListener
+//ManApiAppendListenerById
 //
 //通信処理からのコールバッククラスインスタンスを登録します。
 //複数実行で複数の異なるコールバッククラスインスタンスを登録可能です。
@@ -65,6 +65,34 @@ int ManApiAppendListener(ICommListener* pListener)
 int ManApiAppendListenerById(int id, ICommListenerById* pListener)
 {
 	return CommCtrl::GetIns()->AppendListener(id, pListener);
+}
+
+//ManApiRemoveListener
+//
+//通信処理から登録済みのコールバッククラスインスタンスを削除します。
+//(クライアント用)
+//
+// 引数		なし
+// 戻り値	なし
+//
+void ManApiRemoveListener()
+{
+	CommCtrl::GetIns()->RemoveListener();
+}
+
+//ManApiRemoveListenerById
+//
+//通信処理から登録済みのコールバッククラスインスタンスを削除します。
+//(サーバー用)
+//
+// 引数
+// [IN] int					id
+//							通信対象識別ID。呼び出し元で通信対象ごとに一意に指定。
+// 戻り値	なし
+//
+void ManApiRemoveListenerById(int id)
+{
+	CommCtrl::GetIns()->RemoveListener(id);
 }
 
 //ManApiSetParameterInitBrowser

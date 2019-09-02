@@ -24,6 +24,7 @@ CommModuleClient::CommModuleClient(E_BML_IF_COMM_TYPE bmlIfCommType, int queueSi
 //
 CommModuleClient::~CommModuleClient()
 {
+	_tcpClient->RemoveReceiver();
 }
 
 //

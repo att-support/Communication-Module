@@ -49,6 +49,7 @@ protected:
 	bool _busyOffSendFlag;					// ビジー解除状態通知送信フラグ
 	std::string _logName;					// ログ出力時のプリフィクス名称
 	int _sendCounter;						// 送信カウンター（一定回送信ごとにスレッド処理にスリープを挿入するため）
+	bool _term;								// 終了処理中
 
 	// 送信処理（純粋仮想関数）
 	virtual int Send(const unsigned char* cmdData, int cmdLen) = 0;

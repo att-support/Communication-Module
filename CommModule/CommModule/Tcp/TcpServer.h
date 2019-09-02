@@ -37,6 +37,7 @@ public:
 	int ServerStart();
 	int ServerStop();
 	int SetReceiver(TcpReceiveInterface* receiver, int rcvSize);
+	void RemoveReceiver();
 	int Send(const std::vector<unsigned char>& data, const std::string& ipAddr="");
 	int Send(const unsigned char* data, int size, const std::string& ipAddr="");
 	void KeepAliveOn(int idleTime, int interval, int retryCount);

@@ -66,6 +66,24 @@ int CommCtrl::AppendListener(int id, ICommListenerById* pListener)
 }
 
 //
+// リスナー削除
+//
+void CommCtrl::RemoveListener()
+{
+	LOG("[CommCtrl] Remove listener.");
+	return GetCommMain(0)->RemoveListener();
+}
+
+//
+// リスナー削除(ID指定)
+//
+void CommCtrl::RemoveListener(int id)
+{
+	LOG("[CommCtrl] Remove listener.");
+	return GetCommMain(id)->RemoveListenerById();
+}
+
+//
 // クライアント初期設定（プロセスパスと制御ポート）
 //
 int CommCtrl::SetParameterInitBrowser(int id, const char* pBmlBrowserPath, int port)

@@ -21,6 +21,9 @@ ClientMain::ClientMain()
 	ManApiAppendListener = (FUNC_ManApiAppendListener)GetProcAddress(_hDll, "ManApiAppendListener");
 	if (ManApiAppendListener == NULL) return;
 
+	ManApiRemoveListener = (FUNC_ManApiRemoveListener)GetProcAddress(_hDll, "ManApiRemoveListener");
+	if (ManApiRemoveListener == NULL) return;
+
 	ManApiSetParameterInitBrowser = (FUNC_ManApiSetParameterInitBrowser)GetProcAddress(_hDll, "ManApiSetParameterInitBrowser");
 	if (ManApiSetParameterInitBrowser == NULL) return;
 
@@ -228,6 +231,7 @@ void ClientMain::TestStart(int port)
 		testCounter++;
 		Sleep(10);
 	}
+	ManApiRemoveListener();
 }
 
 void ClientMain::NotifyInfo(E_BML_IF_COMM_TYPE bmlIfCommType, E_BML_IF_COMM_CB_INFO bmlIfCommCbInfo)

@@ -4,6 +4,7 @@
 
 typedef int(__stdcall *FUNC_ManApiSetParameterInitComm)(int id, E_BML_IF_COMM_TYPE bmlIfCommType, int port, int queueSize);
 typedef int(__stdcall *FUNC_ManApiAppendListenerById)(int id, ICommListenerById* pListener);
+typedef void(__stdcall *FUNC_ManApiRemoveListenerById)(int id);
 typedef int(__stdcall *FUNC_ManApiSetParameterInitBrowser)(int id, const char* pBmlBrowserPath, int port);
 typedef int(__stdcall *FUNC_ManApiStartServer)(int id);
 typedef int(__stdcall *FUNC_ManApiStartClient)(int port);
@@ -45,6 +46,7 @@ private:
 
 	FUNC_ManApiSetParameterInitComm ManApiSetParameterInitComm;
 	FUNC_ManApiAppendListenerById ManApiAppendListenerById;
+	FUNC_ManApiRemoveListenerById ManApiRemoveListenerById;
 	FUNC_ManApiSetParameterInitBrowser ManApiSetParameterInitBrowser;
 	FUNC_ManApiStartServer ManApiStartServer;
 	FUNC_ManApiStartClient ManApiStartClient;

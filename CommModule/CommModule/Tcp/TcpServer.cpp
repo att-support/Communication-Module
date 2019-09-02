@@ -108,6 +108,10 @@ int TcpServer::SetReceiver(TcpReceiveInterface* receiver, int rcvSize) {
 	return 0;
 }
 
+void TcpServer::RemoveReceiver() {
+	m_receiver = NULL;
+}
+
 int TcpServer::Send(const std::vector<unsigned char>& data, const std::string& ipAddr) {
 	int ret = -1;
 	//全接続先に送信

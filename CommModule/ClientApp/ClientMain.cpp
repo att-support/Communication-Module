@@ -232,6 +232,7 @@ void ClientMain::TestStart(int port)
 		Sleep(10);
 	}
 	ManApiRemoveListener();
+	ManApiStop();
 }
 
 void ClientMain::NotifyInfo(E_BML_IF_COMM_TYPE bmlIfCommType, E_BML_IF_COMM_CB_INFO bmlIfCommCbInfo)

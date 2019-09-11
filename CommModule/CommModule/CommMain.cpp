@@ -286,12 +286,12 @@ void CommMain::NotifyStat(bool isBusy)
 //
 void CommMain::NotifyTerm()
 {
-	LOG("[CommMain(id=%d)] Received terminate notify.", _id);
+	LOG("[CommMain(id=%d)] Received terminate notify!.", _id);
 
 	if (_isServer) return;
 
 	//通信停止
-	Stop();
+	_TermClient();
 
 	for (std::vector<ICommListener*>::iterator itr = _pListenerList.begin();
 		itr != _pListenerList.end(); itr++)
@@ -348,6 +348,25 @@ void CommMain::NotifyDisconnected(E_BML_IF_COMM_TYPE commType, int port)
 	{
 		(*itr)->NotifyInfo(_id, commType, BML_IF_COMM_CB_INFO_DISCONNECTED);
 	}
+}
+
+//
+// クライアント終了処理
+//
+void CommMain::_TermClient()
+{
+	//制御用通信モジュール以外を終了
+	//（本処理はクライアントの制御用通信モジュールからのコールバックで実行されるため）
+	_isTerminating = true;
+	for (std::map<E_BML_IF_COMM_TYPE, CommModule*>::iterator itr = _dataCommModuleList.begin();
+		itr != _dataCommModuleList.end(); itr++)
+	{
+		LOG("[CommMain(id=%d)] Stop. (type=%d)", _id, (*itr).first);
+
+		(*itr).second->Stop();
+		delete (*itr).second;
+	}
+	_dataCommModuleList.clear();
 }
 
 //

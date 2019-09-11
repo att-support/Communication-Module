@@ -73,6 +73,8 @@ private:
 
 	// 終了処理
 	void _StopProc();
+	// クライアント終了処理
+	void _TermClient();
 
 };
 

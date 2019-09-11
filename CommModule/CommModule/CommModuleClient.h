@@ -22,6 +22,8 @@ private:
 	//
 	// ‘—Mˆ—
 	int Send(const unsigned char* cmdData, int cmdLen);
+	// TCP/IP’ÊM’â~ˆ—
+	int TcpStop();
 
 	//
 	// Thread class override methods

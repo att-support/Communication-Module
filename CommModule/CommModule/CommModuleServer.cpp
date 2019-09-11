@@ -34,6 +34,13 @@ int CommModuleServer::Send(const unsigned char* cmdData, int cmdLen)
 {
 	return _tcpServer->Send(cmdData, cmdLen);
 }
+//
+// TCP/IP通信停止処理
+//
+int CommModuleServer::TcpStop()
+{
+	return _tcpServer->ServerStop();
+}
 
 //
 // スレッド前処理

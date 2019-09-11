@@ -80,7 +80,7 @@ int TcpClient::Disconnect() {
 	//StopThread(5);
 	StopThread(300);	//接続先がいない場合のコネクトタイムアウト時間を考慮して長めに設定
 	//if(m_sock != INVALID_SOCKET){
-		CloseSocket();
+	CloseSocket();
 	//}
 	return 0;
 }
@@ -185,8 +185,8 @@ int TcpClient::ThreadProc()
 
 	//受信確認
 	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
+	tv.tv_sec = 0;
+	tv.tv_usec = 100000;
 	fd_set fds;
 	memcpy(&fds, &m_readfds, sizeof(fd_set));
 	ret = select((SOCKET_TYPE)((int)m_sock+1), &fds, NULL, NULL, &tv);
@@ -216,7 +216,8 @@ int TcpClient::ThreadProc()
 			TCPLOG(m_nameForLog + "Disconnected.");
 			CloseSocket();
 			delete[] buf;
-			return 0;
+			m_processStop = true; // terminate. (no connect retry.)
+			return -1;
 		}
 		else if(rcvSize < 0){
 			TCPLOG(m_nameForLog + "[ERROR] Receive failed. size=%d errno=%d (%s)",m_receiveSize,errno,strerror(errno));

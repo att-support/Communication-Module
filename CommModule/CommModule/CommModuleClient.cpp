@@ -34,6 +34,14 @@ int CommModuleClient::Send(const unsigned char* cmdData, int cmdLen)
 {
 	return _tcpClient->Send(cmdData, cmdLen);
 }
+//
+// TCP/IP通信停止処理
+//
+int CommModuleClient::TcpStop()
+{
+	_isConnected = false;
+	return _tcpClient->Disconnect();
+}
 
 //
 // スレッド前処理

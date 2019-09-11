@@ -188,8 +188,8 @@ int TcpServerSession::ThreadProc() {
 	int ret;
 	//受信確認
 	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
+	tv.tv_sec = 0;
+	tv.tv_usec = 100000;
 	fd_set fds;
 	memcpy(&fds, &m_readfds, sizeof(fd_set));
 	ret = select((SOCKET_TYPE)((int)m_sock+1), &fds, NULL, NULL, &tv);

@@ -78,6 +78,10 @@ int TcpServer::ServerStop() {
 	}
 	m_processStop = true;
 	Lock();
+	for (std::vector<TcpServerSession*>::iterator itr = m_delSessions.begin(); itr != m_delSessions.end(); itr++) {
+		delete *itr;
+	}
+	m_delSessions.clear();
 	for(std::map<std::string,TcpServerSession*>::iterator itr = m_sessionList.begin();
 			itr != m_sessionList.end(); itr++)
 	{
@@ -251,6 +255,14 @@ int TcpServer::ThreadInitProc() {
 
 int TcpServer::ThreadProc()
 {
+	Lock();
+	if (!m_delSessions.empty()) {
+		for (std::vector<TcpServerSession*>::iterator itr = m_delSessions.begin(); itr != m_delSessions.end(); itr++) {
+			delete *itr;
+		}
+		m_delSessions.clear();
+	}
+	Unlock();
 	if(m_processStop) return 0;
 
 	if(m_sock == INVALID_SOCKET){
@@ -261,8 +273,8 @@ int TcpServer::ThreadProc()
 		}
 	}
 	struct timeval tv;
-	tv.tv_sec = 1;
-	tv.tv_usec = 0;
+	tv.tv_sec = 0;
+	tv.tv_usec = 100000;
 	fd_set fds;
 	memcpy(&fds, &m_readfds, sizeof(fd_set));
 	int ret = select((SOCKET_TYPE)((int)m_sock+1), &fds, NULL, NULL, &tv);
@@ -410,7 +422,8 @@ int TcpServer::Disconnected(const std::string& clientIpAddr, bool destroy)
 	}
 	//Unlock();
 	if((session != NULL) && destroy){
-		delete session;
+		//delete session;
+		m_delSessions.push_back(session);
 	}
 	Unlock();
 	//削除済みはOK

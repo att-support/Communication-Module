@@ -53,6 +53,8 @@ protected:
 
 	// 送信処理（純粋仮想関数）
 	virtual int Send(const unsigned char* cmdData, int cmdLen) = 0;
+	// TCP/IP通信停止処理（純粋仮想関数）
+	virtual int TcpStop() = 0;
 
 	//
 	// Thread class override methods

@@ -71,6 +71,7 @@ protected:
 	bool m_logOn;
 	bool m_processStop;
 	Mutex m_lockObj;
+	std::vector<TcpServerSession*> m_delSessions;
 
 	virtual int ThreadProc();
 	virtual int ThreadInitProc();

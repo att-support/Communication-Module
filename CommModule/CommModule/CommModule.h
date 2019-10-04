@@ -22,8 +22,10 @@ public:
 	virtual ~CommModule();
 	// 通信開始
 	int Start();
-	// 通信停止
+	// 通信停止指示
 	int Stop();
+	// 通信停止待ち
+	void WaitStop();
 	// 電文送信
 	int SendCommand(CommCommand* cmd);
 	// 送信データ蓄積(エンキュー)

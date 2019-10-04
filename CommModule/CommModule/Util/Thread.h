@@ -42,6 +42,7 @@ public:
 	virtual int StartThread();						//スレッド開始
 	virtual int StopThread();						//スレッド停止
 	virtual int StopThread(int timeOutSec);			//スレッド停止
+	void StopThreadAsync();							//スレッド停止(非同期)
 	void WaitThreadEnd();								//スレッド終了待ち
 	void SetThName(const std::string& thName);			//スレッド名設定
 	std::string GetThName();							//スレッド名取得

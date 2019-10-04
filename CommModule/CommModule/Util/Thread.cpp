@@ -52,6 +52,13 @@ Thread::~Thread() {
 	if(IsRunning()){
 		_StopThread(3);
 	}
+#if defined(WIN32) || defined(WIN64)
+	if (_pthreadId != 0) {
+		::WaitForSingleObject(_pthreadId, INFINITE);
+		::CloseHandle(_pthreadId);
+		_pthreadId = 0;
+	}
+#endif
 }
 
 int Thread::StartThread()
@@ -88,11 +95,15 @@ int Thread::StartThread()
 	// スレッド生成
 	ret = 0;
 #if defined(WIN32) || defined(WIN64)
+	if (_pthreadId != 0) {
+		::WaitForSingleObject(_pthreadId, INFINITE);
+		::CloseHandle(_pthreadId);
+		_pthreadId = 0;
+	}
 	_pthreadId = (HANDLE)_beginthreadex(NULL, 0, Thread::ThreadMain, (void*)this, 0, &_sysThreadId);
 	if (_pthreadId == (HANDLE)-1L) {
 		ret = -1;
 	}
-
 #else
 	ret = 	pthread_create(&_pthreadId, &_pthreadAttr, Thread::ThreadMain, (void*)this);
 #endif
@@ -153,17 +164,33 @@ int Thread::_StopThread(int timeOutSec)
 		//（またメッセージキュー待ちやソケットの受信待ちなどのブロッキング状態では効果がないため）
 #if defined(WIN32) || defined(WIN64)
 		::CloseHandle(_pthreadId);
+		_pthreadId = 0;
 #endif
 		return -1;
 	}
 #if defined(WIN32) || defined(WIN64)
 	::WaitForSingleObject(_pthreadId, INFINITE);
 	::CloseHandle(_pthreadId);
+	_pthreadId = 0;
 #endif
 
 	//COUT("%s 停止処理終了", _thName.c_str());
 	return 0;
 }
+
+void Thread::StopThreadAsync()
+{
+	if (!IsRunning()) {
+		return;
+	}
+	if (_thStatus == TH_STAT_TERMINATING) {
+		return;
+	}
+	_thStatus = TH_STAT_TERMINATING;
+	// スレッド停止(指示)
+	_ThreadRun = false;
+}
+
 bool Thread::IsRunning()
 {
 	return !_ThreadStopped;
@@ -265,7 +292,7 @@ void Thread::WaitThreadEnd()
 				//COUT("%s thread end.(%lu[msec])", _thName.c_str(), (msec*10));
 				break;
 			}
-			Sleep(10);
+			Sleep(1);
 			msec++;
 		}
 	}

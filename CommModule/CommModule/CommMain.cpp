@@ -381,15 +381,28 @@ void CommMain::_StopProc()
 		LOG("[CommMain(id=%d)] Stop. (type=%d)", _id, (*itr).first);
 
 		(*itr).second->Stop();
-		delete (*itr).second;
 	}
-	_dataCommModuleList.clear();
 
 	if (_ctrlCommModule != NULL) {
 		LOG("[CommMain(id=%d)] Stop. (type=%d)", _id, BML_IF_COMM_TYPE_CTRL);
 
 		_ctrlCommModule->Stop();
+	}
+
+	for (std::map<E_BML_IF_COMM_TYPE, CommModule*>::iterator itr = _dataCommModuleList.begin();
+		itr != _dataCommModuleList.end(); itr++)
+	{
+		(*itr).second->WaitStop();
+		delete (*itr).second;
+		LOG("[CommMain(id=%d)] End. (type=%d)", _id, (*itr).first);
+	}
+	_dataCommModuleList.clear();
+
+	if (_ctrlCommModule != NULL) {
+
+		_ctrlCommModule->WaitStop();
 		delete _ctrlCommModule;
 		_ctrlCommModule = NULL;
+		LOG("[CommMain(id=%d)] End. (type=%d)", _id, BML_IF_COMM_TYPE_CTRL);
 	}
 }

@@ -74,9 +74,24 @@ int TcpServer::ServerStart() {
 
 int TcpServer::ServerStop() {
 	if(m_processStop == true){
+		WaitThreadEnd();
 		return 0;
 	}
 	m_processStop = true;
+	std::vector<TcpServerSession*> _sessions;
+	Lock();
+	for (std::map<std::string, TcpServerSession*>::iterator itr = m_sessionList.begin();
+		itr != m_sessionList.end(); itr++)
+	{
+		_sessions.push_back((*itr).second);
+	}
+	Unlock();
+	for (std::vector<TcpServerSession*>::iterator itr = _sessions.begin();
+		itr != _sessions.end(); itr++)
+	{
+		(*itr)->StopSession();
+	}
+	//TCPLOG(m_nameForLog + "[DEBUG] Lock ServerStop");
 	Lock();
 	for (std::vector<TcpServerSession*>::iterator itr = m_delSessions.begin(); itr != m_delSessions.end(); itr++) {
 		delete *itr;
@@ -90,6 +105,7 @@ int TcpServer::ServerStop() {
 	}
 	m_sessionList.clear();
 	Unlock();
+	//TCPLOG(m_nameForLog + "[DEBUG] Unlock ServerStop");
 	if(m_sock != INVALID_SOCKET){
 		CloseSocket();
 	}
@@ -255,15 +271,19 @@ int TcpServer::ThreadInitProc() {
 
 int TcpServer::ThreadProc()
 {
-	Lock();
-	if (!m_delSessions.empty()) {
-		for (std::vector<TcpServerSession*>::iterator itr = m_delSessions.begin(); itr != m_delSessions.end(); itr++) {
-			delete *itr;
+	if (!m_processStop) {
+		Lock();
+		if (!m_delSessions.empty()) {
+			for (std::vector<TcpServerSession*>::iterator itr = m_delSessions.begin(); itr != m_delSessions.end(); itr++) {
+				delete *itr;
+			}
+			m_delSessions.clear();
 		}
-		m_delSessions.clear();
+		Unlock();
 	}
-	Unlock();
-	if(m_processStop) return 0;
+	else {
+		return 0;
+	}
 
 	if(m_sock == INVALID_SOCKET){
 		Sleep(3000);
@@ -415,6 +435,7 @@ int TcpServer::Disconnected(const std::string& clientIpAddr, bool destroy)
 	}
 
 	TcpServerSession* session = NULL;
+	//TCPLOG(m_nameForLog + "[DEBUG] Lock Disconnected");
 	Lock();
 	if(m_sessionList.find(clientIpAddr) != m_sessionList.end()){
 		session = m_sessionList[clientIpAddr];
@@ -426,6 +447,7 @@ int TcpServer::Disconnected(const std::string& clientIpAddr, bool destroy)
 		m_delSessions.push_back(session);
 	}
 	Unlock();
+	//TCPLOG(m_nameForLog + "[DEBUG] Unlock Disconnected");
 	//削除済みはOK
 	return 0;
 }
@@ -471,7 +493,8 @@ int TcpServer::GetSessionCount()
 }
 
 int TcpServer::StopSession(){
-	std::vector<TcpServerSession*> delList;
+	//std::vector<TcpServerSession*> delList;
+	//TCPLOG(m_nameForLog + "[DEBUG] Lock StopSession");
 	Lock();
 	for(std::map<std::string,TcpServerSession*>::iterator itr = m_sessionList.begin();
 			itr != m_sessionList.end(); itr++)
@@ -479,18 +502,21 @@ int TcpServer::StopSession(){
 		if(m_logOn){
 			TCPLOG(m_nameForLog + "Stop session. (client=%s)", ((*itr).first).c_str());
 		}
-		delList.push_back((*itr).second); //移し変え
+		//delList.push_back((*itr).second); //移し変え
+		m_delSessions.push_back((*itr).second); //移し変え
 	}
 	m_sessionList.clear();
 	Unlock();
+	//TCPLOG(m_nameForLog + "[DEBUG] Unlock StopSession");
+
 	int ret = 0;
-	for(std::vector<TcpServerSession*>::iterator itr = delList.begin();
-			itr != delList.end(); itr++){
-		if((*itr)->StopSession() != 0){
-			ret = -1;
-		}
-		delete (*itr);
-	}
+	//for(std::vector<TcpServerSession*>::iterator itr = delList.begin();
+	//		itr != delList.end(); itr++){
+	//	if((*itr)->StopSession() != 0){
+	//		ret = -1;
+	//	}
+	//	delete (*itr);
+	//}
 	return ret;
 }
 

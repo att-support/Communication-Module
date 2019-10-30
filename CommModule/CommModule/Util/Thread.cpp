@@ -145,7 +145,8 @@ int Thread::_StopThread(int timeOutSec)
 		return 0;
 	}
 	if (_thStatus == TH_STAT_TERMINATING) {
-		//すでに停止処理中の場合も停止処理は行わない
+		//すでに停止処理中の場合はスレッド停止を待つ
+		WaitThreadEnd();
 		return 0;
 	}
 	_thStatus = TH_STAT_TERMINATING;

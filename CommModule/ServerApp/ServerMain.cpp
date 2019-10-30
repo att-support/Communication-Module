@@ -75,7 +75,7 @@ int ServerMain::ThreadProc() {
 	if (!_isRunning) {
 		return -1;
 	}
-	if ((pushCounter >= 50) || (pushCounter == 0)) {
+	if ((pushCounter >= 20) || (pushCounter == 0)) {
 		pushCounter = 0;
 		pushCount++;
 
@@ -188,7 +188,7 @@ int ServerMain::ThreadProc() {
 	}
 	ReleaseCommData(&commData);
 
-	if (testCounter >= 300) {
+	if (testCounter >= 50) {
 		commData = NULL;
 		ret = OutputApiPullDataById(pattern, BML_IF_COMM_TYPE_STATUS_INFO, &commData);
 		if ((ret == MAN_API_RET_SUCCSESS) && (commData != NULL)) {

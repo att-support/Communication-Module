@@ -46,6 +46,7 @@ TcpClient::~TcpClient() {
 		CloseSocket();
 	//}
 	//受信スレッドは基底クラスThreadBaseのデストラクタで停止される
+	WaitThreadEnd();
 }
 
 int TcpClient::Connect() {

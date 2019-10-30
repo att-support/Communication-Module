@@ -34,7 +34,7 @@ TcpServerSession::TcpServerSession(int serverPort, const std::string& clientIpAd
 	m_receiver = receiver;
 	m_logOn = false;
 	m_isAlive = false;
-	m_sessionEnd = false;
+	//m_sessionEnd = false;
 }
 
 TcpServerSession::~TcpServerSession() {
@@ -42,6 +42,9 @@ TcpServerSession::~TcpServerSession() {
 //	if(!m_isAlive){
 //		return;
 //	}
+	if (m_logOn) {
+		TCPLOG(m_nameForLog + "Session destroy start");
+	}
 	if(m_isAlive){
 		m_isAlive = false;
 		CloseSocket(false);
@@ -49,12 +52,15 @@ TcpServerSession::~TcpServerSession() {
 //	m_isAlive = false;
 //	CloseSocket(false);
 	//デストラクタでは確実にスレッドの停止を待つ
-	//(ただし自身で終了する場合以外)
-	if(IsRunning() && !m_sessionEnd){
+	//if(IsRunning() && !m_sessionEnd){
+	if(IsRunning()){
 		int ret = StopThread(3);
 		if(ret != 0){
 			TCPLOG(m_nameForLog + "[ERROR] Stop receive thread failed.");
 		}
+	}
+	if (m_logOn) {
+		TCPLOG(m_nameForLog + "Session destroy end");
 	}
 }
 
@@ -121,7 +127,15 @@ int TcpServerSession::StartSessionWithKeepAlive(int idleTime, int interval, int 
 //Disconnected()コールバック先からの呼び出しも同じなので注意
 int TcpServerSession::StopSession()
 {
+	//m_sessionEnd = false;
+	if (m_logOn) {
+		TCPLOG(m_nameForLog + "Stop session start");
+	}
 	if(!m_isAlive){
+		if (m_logOn) {
+			TCPLOG(m_nameForLog + "Stop session end (Already stopped)");
+		}
+		WaitThreadEnd();
 		return 0;
 	}
 	m_isAlive = false;
@@ -131,6 +145,9 @@ int TcpServerSession::StopSession()
 		if(ret != 0){
 			TCPLOG(m_nameForLog + "[ERROR] Stop receive thread failed.");
 		}
+	}
+	if (m_logOn) {
+		TCPLOG(m_nameForLog + "Stop session end");
 	}
 	return 0;
 }
@@ -198,7 +215,7 @@ int TcpServerSession::ThreadProc() {
 		return 0;
 	}
 	if(ret == -1){
-		m_sessionEnd = true;
+		//m_sessionEnd = true;
 		TCPLOG(m_nameForLog + "[ERROR] Select failed. errno=%d (%s)",errno,strerror(errno));
 		return -1; //スレッド終了
 	}
@@ -209,13 +226,13 @@ int TcpServerSession::ThreadProc() {
 		char* buf = new char[m_receiveSize];
 		int rcvSize = recv(m_sock, buf, m_receiveSize, 0);
 		if(rcvSize == 0){
-			m_sessionEnd = true;
+			//m_sessionEnd = true;
 			TCPLOG(m_nameForLog + "Disconnected.");
 			delete[] buf;
 			return -1; //スレッド終了
 		}
 		else if(rcvSize < 0){
-			m_sessionEnd = true;
+			//m_sessionEnd = true;
 			TCPLOG(m_nameForLog + "[ERROR] Receive failed. size=%d errno=%d (%s)",m_receiveSize,errno,strerror(errno));
 			delete[] buf;
 			return -1; //スレッド終了
@@ -254,11 +271,11 @@ int TcpServerSession::ThreadInitProc() {
 }
 
 int TcpServerSession::ThreadTermProc() {
-	m_isAlive = false;
 	if(m_logOn){
 		TCPLOG(m_nameForLog + "Stop receive thread.");
 	}
 	CloseSocket(true);
+	m_isAlive = false;
 	return 0;
 }
 
@@ -269,9 +286,15 @@ std::string TcpServerSession::GetClientIpAddr() const
 
 void TcpServerSession::CloseSocket(bool notify)
 {
+	if (m_logOn) {
+		TCPLOG(m_nameForLog + "Socket close start " + (notify ? "(with notify)" : ""));
+	}
 	Lock();
 	if(m_sock == INVALID_SOCKET){
 		Unlock();
+		if (m_logOn) {
+			TCPLOG(m_nameForLog + "Socket close end   " + (notify ? "(with notify)" : "") + "(Already closed)");
+		}
 		return;
 	}
 #if defined(WIN32) || defined(WIN64)
@@ -294,6 +317,9 @@ void TcpServerSession::CloseSocket(bool notify)
 	//切断通知
 	if((m_receiver != NULL) && notify){
 		m_receiver->Disconnected(m_clientIpAddr, notify);
+	}
+	if (m_logOn) {
+		TCPLOG(m_nameForLog + "Socket close end   " + (notify ? "(with notify)" : ""));
 	}
 }
 

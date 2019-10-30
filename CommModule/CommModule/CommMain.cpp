@@ -20,6 +20,7 @@ CommMain::CommMain(int id)
 	_id = id;
 	_ctrlCommModule = NULL;
 	_isServer = false;
+	_isInitialing = true;
 	_isTerminating = false;
 }
 
@@ -115,7 +116,9 @@ int CommMain::StartServer()
 	{
 		CommModule* mod = new CommModuleServer((*itr).GetType(), (*itr).GetQueSize(), (*itr).GetPort());
 		mod->SetOwner(this);
+		Lock();
 		_dataCommModuleList[(*itr).GetType()] = mod;
+		Unlock();
 		if (mod->Start() != 0) {
 			isError = true;
 			LOG("[CommMain(id=%d)] [ERROR] Server comminucation module start failed. (port=%d)", _id, (*itr).GetPort());
@@ -150,6 +153,7 @@ int CommMain::StartServer()
 	}
 
 	_isServer = true;
+	_isInitialing = false;
 
 	return MAN_API_RET_SUCCSESS;
 }
@@ -173,6 +177,7 @@ int CommMain::StartClient(int port)
 	}
 
 	_isServer = false;
+	_isInitialing = false;
 
 	return MAN_API_RET_SUCCSESS;
 }
@@ -182,6 +187,8 @@ int CommMain::StartClient(int port)
 //
 int CommMain::Stop()
 {
+	if (_isInitialing || _isTerminating) return MAN_API_RET_INIT;
+
 	int retCode = MAN_API_RET_SUCCSESS;
 	if (_isServer) {
 		_isServer = false;
@@ -208,15 +215,19 @@ int CommMain::Stop()
 //
 int CommMain::PushData(E_BML_IF_COMM_TYPE bmlIfCommType, ICommData* pData)
 {
+	if (_isInitialing || _isTerminating) return MAN_API_RET_INIT;
 #ifdef _DEBUG_LOG_
 	LOG("[CommMain(id=%d)] Push data. (type=%d)", _id, bmlIfCommType);
 #endif
 
+	Lock();
 	if (_dataCommModuleList.find(bmlIfCommType) == _dataCommModuleList.end()) {
 		LOG("[CommMain(id=%d)] [ERROR] Push data failed. Unknown type. (type=%d)", _id, bmlIfCommType);
+		Unlock();
 		return MAN_API_RET_ERROR;
 	}
 	CommModule* mod = _dataCommModuleList[bmlIfCommType];
+	Unlock();
 
 	return mod->PushData(pData);
 }
@@ -226,15 +237,19 @@ int CommMain::PushData(E_BML_IF_COMM_TYPE bmlIfCommType, ICommData* pData)
 //
 int CommMain::PullData(E_BML_IF_COMM_TYPE bmlIfCommType, ICommData** pData)
 {
+	if (_isInitialing || _isTerminating) return MAN_API_RET_INIT;
 #ifdef _DEBUG_LOG_
 	LOG("[CommMain(id=%d)] Pull data. (type=%d)", bmlIfCommType);
 #endif
 
+	Lock();
 	if (_dataCommModuleList.find(bmlIfCommType) == _dataCommModuleList.end()) {
 		LOG("[CommMain(id=%d)] [WARN]  Pull data failed. Unknown type. (type=%d)", _id, bmlIfCommType);
+		Unlock();
 		return MAN_API_RET_NOT_EXIST;
 	}
 	CommModule* mod = _dataCommModuleList[bmlIfCommType];
+	Unlock();
 
 	return mod->PullData(pData);
 }
@@ -255,12 +270,15 @@ void CommMain::NotifyCtrlInfo(CommCtrlInfoList& ctrlInfoList)
 	{
 		CommModule* mod = new CommModuleClient((*itr).GetType(), (*itr).GetQueSize(), "127.0.0.1", (*itr).GetPort());
 		mod->SetOwner(this);
+		Lock();
 		_dataCommModuleList[(*itr).GetType()] = mod;
+		Unlock();
 		LOG("[CommMain(id=%d)] Start connection. (type=%d qsize=%d port=%d)", _id,
 			(*itr).GetType(), (*itr).GetQueSize(), (*itr).GetPort());
 		if (mod->Start() != 0) {
 			LOG("[CommMain(id=%d)] [ERROR] Start connection failed. (type=%d qsize=%d port=%d)", _id,
 				(*itr).GetType(), (*itr).GetQueSize(), (*itr).GetPort());
+			Lock();
 			for (std::map<E_BML_IF_COMM_TYPE,CommModule*>::iterator itr = _dataCommModuleList.begin();
 				itr != _dataCommModuleList.end(); itr++)
 			{
@@ -268,6 +286,7 @@ void CommMain::NotifyCtrlInfo(CommCtrlInfoList& ctrlInfoList)
 				delete (*itr).second;
 			}
 			_dataCommModuleList.clear();
+			Unlock();
 			return;
 		}
 	}
@@ -358,6 +377,7 @@ void CommMain::_TermClient()
 	//制御用通信モジュール以外を終了
 	//（本処理はクライアントの制御用通信モジュールからのコールバックで実行されるため）
 	_isTerminating = true;
+	Lock();
 	for (std::map<E_BML_IF_COMM_TYPE, CommModule*>::iterator itr = _dataCommModuleList.begin();
 		itr != _dataCommModuleList.end(); itr++)
 	{
@@ -367,6 +387,7 @@ void CommMain::_TermClient()
 		delete (*itr).second;
 	}
 	_dataCommModuleList.clear();
+	Unlock();
 }
 
 //
@@ -375,6 +396,7 @@ void CommMain::_TermClient()
 void CommMain::_StopProc()
 {
 	_isTerminating = true;
+	Lock();
 	for (std::map<E_BML_IF_COMM_TYPE, CommModule*>::iterator itr = _dataCommModuleList.begin();
 		itr != _dataCommModuleList.end(); itr++)
 	{
@@ -405,4 +427,5 @@ void CommMain::_StopProc()
 		_ctrlCommModule = NULL;
 		LOG("[CommMain(id=%d)] End. (type=%d)", _id, BML_IF_COMM_TYPE_CTRL);
 	}
+	Unlock();
 }

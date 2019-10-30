@@ -58,7 +58,7 @@ protected:
 	std::string m_nameForLog;
 	bool m_logOn;
 	bool m_isAlive;
-	bool m_sessionEnd;
+	//bool m_sessionEnd;
 	Mutex m_lockObj;
 
 	virtual int ThreadProc();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Util/Mutex.h>
 #include "CommData.h"
 #include "CommDef.h"
 #include "CommModule.h"
@@ -69,7 +70,15 @@ private:
 	std::map<E_BML_IF_COMM_TYPE, CommModule*> _dataCommModuleList;
 													// データ通信用通信モジュールリスト(Key:通信種別)
 	bool _isServer;									// サーバ起動判定 (true:サーバ起動/false:クライアント起動)
+	bool _isInitialing;								// 初期化中判定 (true:初期化中)
 	bool _isTerminating;							// 終了処理中判定 (true:終了処理中)
+	Mutex _locker;
+	void Lock() {
+		_locker.Lock();
+	}
+	void Unlock() {
+		_locker.Unlock();
+	}
 
 	// 終了処理
 	void _StopProc();
